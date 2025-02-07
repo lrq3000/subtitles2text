@@ -82,52 +82,72 @@ def process_pdf(file_path, do_ocr):
         return None
 
 
-
-def process_file(input_file_path, output_text, do_ocr=False):
-    """Processes the selected subtitle file."""
+def process_file(input_file_path, output_text, do_ocr=False, save_file_path=None):
+    """Processes the selected subtitle file or URL."""
     if not input_file_path:
-        messagebox.showwarning("Warning", "No file selected.")
+        messagebox.showwarning("Warning", "No file or URL provided.")
         return
 
-    base_name = os.path.splitext(os.path.basename(input_file_path))[0]
-    output_file_path = os.path.join(os.path.dirname(input_file_path), f"{base_name}.txt")
+    extracted_text = None
 
-
-    if input_file_path.lower().endswith('.srt'):
+    if input_file_path.startswith(('http://', 'https://')):
+        # Handle URL
+        file_path_or_url = input_file_path
+        extracted_text = process_pdf(file_path_or_url, do_ocr) # process URL like file
+        if not save_file_path:
+            if not save_file_path:
+                messagebox.showerror("Error", "Save file path is required for URLs but not provided.")
+                return
+    elif input_file_path.lower().endswith('.srt'):
         extracted_text = process_srt(input_file_path, output_text)
     elif input_file_path.lower().endswith('.vtt'):
         extracted_text = process_vtt(input_file_path, output_text)
     elif input_file_path.lower().endswith(('.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.html', '.xhtml', '.png', '.jpeg', '.jpg', '.tiff', '.bmp')):
         extracted_text = process_pdf(input_file_path, do_ocr) # Use process_pdf for other formats
     else:
-        messagebox.showerror("Error", "Unsupported file format. Please select a supported file format.")
+        messagebox.showerror("Error", "Unsupported file format or invalid URL.")
         return
 
     if extracted_text is not None:
-      try:
-        with open(output_file_path, 'w', encoding='utf-8') as outfile:
-            outfile.write(extracted_text)
-        output_text.insert(tk.END, f"Successfully processed {os.path.basename(input_file_path)} and saved to {os.path.basename(output_file_path)}\n")
-      except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        if not save_file_path and not input_file_path.startswith(('http://', 'https://')):
+            base_name = os.path.splitext(os.path.basename(input_file_path))[0]
+            save_file_path = os.path.join(os.path.dirname(input_file_path), f"{base_name}.txt")
+        try:
+            with open(save_file_path, 'w', encoding='utf-8') as outfile:
+                outfile.write(extracted_text)
+            output_text.insert(tk.END, f"Successfully processed input and saved to {os.path.basename(save_file_path)}\n")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
 
-def select_file(output_text, do_ocr):
-    """Opens a file dialog to select a subtitle file."""
-    file_path = filedialog.askopenfilename(
-        title="Select File",
-        filetypes=[
-            ("All supported files", "*.srt;*.vtt;*.pdf;*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx;*.html;*.xhtml;*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
-            ("Subtitle files", "*.srt;*.vtt"),
-            ("PDF files", "*.pdf"),
-            ("Office documents", "*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx"),
-            ("Web pages", "*.html;*.xhtml"),
-            ("Image files", "*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
-            ("All files", "*.*"),
-        ]
-    )
-    if file_path:
-      process_file(file_path, output_text, do_ocr)
+def select_file(output_text, do_ocr, input_source, url_text):
+    """Opens a file dialog to select a file or processes URL."""
+    if input_source == "file":
+        file_path = filedialog.askopenfilename(
+            title="Select File",
+            filetypes=[
+                ("All supported files", "*.srt;*.vtt;*.pdf;*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx;*.html;*.xhtml;*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
+                ("Subtitle files", "*.srt;*.vtt"),
+                ("PDF files", "*.pdf"),
+                ("Office documents", "*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx"),
+                ("Web pages", "*.html;*.xhtml"),
+                ("Image files", "*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
+                ("All files", "*.*"),
+            ]
+        )
+        if file_path:
+            process_file(file_path, output_text, do_ocr)
+    elif input_source == "url":
+        url = url_text.strip()
+        if url:
+            save_file_path = filedialog.asksaveasfilename(
+                defaultextension=".txt",
+                title="Save Output File"
+            )
+            if save_file_path:
+                process_file(url, output_text, do_ocr, save_file_path=save_file_path)
+        else:
+            messagebox.showwarning("Warning", "Please enter a URL.")
 
 
 def create_gui():
@@ -141,8 +161,19 @@ def create_gui():
     ocr_check = tk.Checkbutton(root, text="Enable OCR for PDFs", variable=do_ocr_var)
     ocr_check.pack(pady=5)
 
+    # Input source selection (File or URL)
+    input_source_var = tk.StringVar(value="file")
+    file_radio = tk.Radiobutton(root, text="Select File", variable=input_source_var, value="file")
+    url_radio = tk.Radiobutton(root, text="Enter URL", variable=input_source_var, value="url")
+    file_radio.pack(anchor=tk.W)
+    url_radio.pack(anchor=tk.W)
+
+    # URL Entry
+    url_entry = tk.Entry(root, width=80)
+    url_entry.pack(pady=5)
+
     # Select File Button
-    select_button = tk.Button(root, text="Select File", command=lambda: select_file(output_text, do_ocr_var.get()))
+    select_button = tk.Button(root, text="Process", command=lambda: select_file(output_text, do_ocr_var.get(), input_source_var.get(), url_entry.get()))
     select_button.pack(pady=20)
 
     # Output Text Area
