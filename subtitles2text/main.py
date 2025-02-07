@@ -74,11 +74,6 @@ def process_pdf(file_path, do_ocr):
 
         result = doc_converter.convert(file_path)
         return result.document.export_to_markdown()
-        command = f'docling --to md --image-export-mode placeholder "{file_path}" -v' # redundant command
-        process = os.popen(command) # redundant command
-        output = process.read() # redundant command
-        process.close() # redundant command
-        return output.strip() # redundant command
     except FileNotFoundError:
         messagebox.showerror("Error", "PDF file not found.")
         return None
