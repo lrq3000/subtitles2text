@@ -49,7 +49,7 @@ def process_vtt(file_path, output_text):
         return None
 
 def process_pdf(file_path, do_ocr):
-    """Processes a PDF file using docling."""
+    """Processes a PDF or other (office documents, images, web pages) file using docling."""
     try:
         # previous `PipelineOptions` is now `PdfPipelineOptions`
         pipeline_options = PdfPipelineOptions()
