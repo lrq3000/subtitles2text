@@ -14,7 +14,7 @@ name = "subtitles2text"
 version = "0.0.3"
 description = "Subtitles (VTT, SRT, PDF, DOCX, HTML, images, etc) to text convertor, with a GUI, great for preprocessing to feed to LLMs"
 dependencies = [
-    "pm-vtt2txt @ git+https://github.com/lrq3000/pm-vtt2txt",
+    "vtt2txt-ng",
     "docling",
 ]
 requires-python = ">=3.7"
