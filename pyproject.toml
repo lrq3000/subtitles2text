@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]  # beware if using setuptools: setup.py still gets executed, and even if pyproject.toml fields take precedence, if there is any code error in setup.py, building will fail!
 name = "subtitles2text"
-version = "0.0.2"
+version = "0.0.3"
 description = "Subtitles (VTT, SRT, PDF, DOCX, HTML, images, etc) to text convertor, with a GUI, great for preprocessing to feed to LLMs"
 dependencies = [
     "pm-vtt2txt @ git+https://github.com/lrq3000/pm-vtt2txt",

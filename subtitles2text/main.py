@@ -97,10 +97,10 @@ def process_file(input_file_path, output_text, do_ocr=False):
         extracted_text = process_srt(input_file_path, output_text)
     elif input_file_path.lower().endswith('.vtt'):
         extracted_text = process_vtt(input_file_path, output_text)
-    elif input_file_path.lower().endswith('.pdf'):
-        extracted_text = process_pdf(input_file_path, do_ocr)
+    elif input_file_path.lower().endswith(('.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.html', '.xhtml', '.png', '.jpeg', '.jpg', '.tiff', '.bmp')):
+        extracted_text = process_pdf(input_file_path, do_ocr) # Use process_pdf for other formats
     else:
-        messagebox.showerror("Error", "Unsupported file format. Please select a .srt, .vtt, or .pdf file.")
+        messagebox.showerror("Error", "Unsupported file format. Please select a supported file format.")
         return
 
     if extracted_text is not None:
@@ -117,9 +117,12 @@ def select_file(output_text, do_ocr):
     file_path = filedialog.askopenfilename(
         title="Select File",
         filetypes=[
-            ("Subtitle and PDF files", "*.srt;*.vtt;*.pdf"),
+            ("All supported files", "*.srt;*.vtt;*.pdf;*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx;*.html;*.xhtml;*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
             ("Subtitle files", "*.srt;*.vtt"),
             ("PDF files", "*.pdf"),
+            ("Office documents", "*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx"),
+            ("Web pages", "*.html;*.xhtml"),
+            ("Image files", "*.png;*.jpeg;*.jpg;*.tiff;*.bmp"),
             ("All files", "*.*"),
         ]
     )
@@ -130,7 +133,7 @@ def select_file(output_text, do_ocr):
 def create_gui():
     """Creates the main application GUI."""
     root = tk.Tk()
-    root.title("Subtitle Text Extractor")
+    root.title("Subtitles2text - Subtitles Text Extractor")
     do_ocr_var = tk.BooleanVar(value=False) # Initialize BooleanVar for OCR option
 
     # OCR Checkbox
