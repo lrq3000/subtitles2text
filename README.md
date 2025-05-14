@@ -4,6 +4,8 @@
 
 Convert subtitles files (vtt, srt, PDF) and any files supported by Docling (DOCX, PPTX, XLSX, images PNG/JPG/JPEG, web pages HTML/XHTML) from any metadata to only leave the text content. This is especially useful to feed to genAI models such as LLMs and GPTs.
 
+It is made possible by `vtt2txt-ng`, a fork of `vtt2txt`, and `docling`.
+
 ## Installation
 
 ```bash
